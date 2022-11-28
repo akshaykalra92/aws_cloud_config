@@ -154,26 +154,8 @@ resource "aws_config_config_rule" "s3_bucket_ssl_requests_only" {
   depends_on = [aws_config_configuration_recorder.config]
 }
 
-resource "aws_config_config_rule" "sg_unrestricted_common_ports_check" {
 
-  name             = "restricted-common-ports"
-  description      = "A Config rule that checks whether security groups in use do not allow restricted incoming traffic to the specified ports."
-  input_parameters = "{\"blockedPort1\":\"20\",\"blockedPort2\":\"21\",\"blockedPort3\":\"3389\",\"blockedPort4\":\"3306\",\"blockedPort5\":\"4333\"}"
-
-  source {
-    owner             = "AWS"
-    source_identifier = "RESTRICTED_INCOMING_TRAFFIC"
-  }
-  scope {
-    compliance_resource_types = ["AWS::EC2::SecurityGroup"]
-  }
-
-  tags = var.tags_rules
-
-  depends_on = [aws_config_configuration_recorder.config]
-}
-
-resource "aws_config_config_rule" "restricted-common-ports" {
+resource "aws_config_config_rule" "elb-tls-enabled" {
   name        = "elb-tls-https-listeners-only"
   description = "Checks if your Load Balancer is configured with SSL or HTTPS listeners."
 
@@ -187,13 +169,16 @@ resource "aws_config_config_rule" "restricted-common-ports" {
   depends_on = [aws_config_configuration_recorder.config]
 }
 
-resource "aws_config_config_rule" "ConfigRule" {
-  name        = "alb-http-to-https-redirection-check"
-  description = "A Config rule that checks whether HTTP to HTTPS redirection is configured on all HTTP listeners of Application Load Balancers. The rule is NON_COMPLIANT if one or more HTTP listeners of Application Load Balancers do not have HTTP to HTTPS redirection c..."
+resource "aws_config_config_rule" "api-ssl-enabled" {
+  name = "api-gw-ssl-enabled"
+  description = "A Config rule that checks if a REST API stage uses an Secure Sockets Layer (SSL) certificate. This rule is NON_COMPLIANT if the REST API stage does not have an associated SSL certificate."
 
   source {
-    owner             = "AWS"
-    source_identifier = "ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK"
+    owner = "AWS"
+    source_identifier = "API_GW_SSL_ENABLED"
+  }
+  scope {
+    compliance_resource_types = ["AWS::ApiGateway::Stage"]
   }
   tags = var.tags_rules
 
